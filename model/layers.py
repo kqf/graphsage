@@ -98,7 +98,7 @@ class SAGEConv(torch.nn.Module):
         num_samples : int
             Number of neighbors to sample while aggregating. Default: 25.
         """
-        super(GraphSAGE, self).__init__()
+        super().__init__()
         self.agg = MeanAggregator(input_dim, input_dim)
         self.fcs = torch.nn.Linear(2 * input_dim, output_dim)
 
@@ -164,7 +164,7 @@ class GraphSAGE(torch.nn.Module):
         num_samples : int
             Number of neighbors to sample while aggregating. Default: 25.
         """
-        super(GraphSAGE, self).__init__()
+        super().__init__()
 
         self.input_dim = input_dim
         self.hidden_dims = hidden_dims
