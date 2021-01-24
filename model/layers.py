@@ -75,6 +75,69 @@ class MeanAggregator(torch.nn.Module):
         """
         return torch.mean(features, dim=0)
 
+class SAGEConv(torch.nn.Module):
+
+    def __init__(
+        self,
+        input_dim=100,
+        hidden_dims=100,
+        output_dim=100,
+        dropout=0.5,
+        num_samples=25,
+    ):
+        """
+        Parameters
+        ----------
+        input_dim : int
+            Dimension of input node features.
+        output_dim : int
+            Dimension of output node features.
+        dropout : float
+            Dropout rate. Default: 0.5.
+        num_samples : int
+            Number of neighbors to sample while aggregating. Default: 25.
+        """
+        super(GraphSAGE, self).__init__()
+        self.agg = MeanAggregator(input_dim, input_dim)
+        self.fcs = torch.nn.Linear(2 * input_dim, output_dim)
+
+        self.bns = torch.nn.BatchNorm1d(output_dim)
+        self.dropout = torch.nn.Dropout(dropout)
+        self.relu = torch.nn.ReLU()
+
+    def forward(self, features, nodes, mapping, rows):
+        """
+        Parameters
+        ----------
+        features : torch.Tensor
+            An (n' x input_dim) tensor of input node features.
+        node_layers : list of numpy array
+            node_layers[i] is an array of the nodes in the ith layer of the
+            computation graph.
+        mappings : list of dictionary
+            mappings[i] is a dictionary mapping node v (labelled 0 to |V|-1)
+            in node_layers[i] to its position in node_layers[i]. For example,
+            if node_layers[i] = [2,5], then mappings[i][2] = 0 and
+            mappings[i][5] = 1.
+        rows : numpy array
+            rows[i] is an array of neighbors of node i.
+        Returns
+        -------
+        out : torch.Tensor
+            An (len(node_layers[-1]) x output_dim) tensor of node features.
+        """
+
+        aggregated = self.agg(features, nodes, mapping, rows, self.num_samples)
+        current = np.array([mapping[v] for v in nodes], dtype=np.int64)
+        out = torch.cat((features[current, :], aggregated), dim=1)
+        out = self.fcs(out)
+
+        out = self.relu(out)
+        out = self.bns(out)
+        out = self.dropout(out)
+        out = out.div(out.norm(dim=1, keepdim=True) + 1e-6)
+        return out
+
 class GraphSAGE(torch.nn.Module):
 
     def __init__(
@@ -104,28 +167,12 @@ class GraphSAGE(torch.nn.Module):
         self.input_dim = input_dim
         self.hidden_dims = hidden_dims
         self.output_dim = output_dim
-        self.num_samples = num_samples
-        self.num_layers = len(hidden_dims) + 1
 
-        self.aggregators = torch.nn.ModuleList(
-            [MeanAggregator(input_dim, input_dim)])
-        self.aggregators.extend([MeanAggregator(dim, dim)
-                                 for dim in hidden_dims])
+        sizes = [input_dim] + hidden_dims + [output_dim]
 
-        c = 2
-        self.fcs = torch.nn.ModuleList(
-            [torch.nn.Linear(c * input_dim, hidden_dims[0])])
-        self.fcs.extend([
-            torch.nn.Linear(c * hidden_dims[i - 1], hidden_dims[i])
-            for i in range(1, len(hidden_dims))])
-        self.fcs.extend([
-            torch.nn.Linear(c * hidden_dims[-1], output_dim)])
-
-        self.bns = torch.nn.ModuleList([torch.nn.BatchNorm1d(hidden_dim)
-                                        for hidden_dim in hidden_dims])
-
-        self.dropout = torch.nn.Dropout(dropout)
-        self.relu = torch.nn.ReLU()
+        self.layers = torch.nn.ModuleList([
+            SAGEConv(fin, fout) for fin, fout in zip(sizes[:-1], sizes[1:])
+        ])
 
     def forward(self, features, node_layers, mappings, rows):
         """
@@ -149,22 +196,12 @@ class GraphSAGE(torch.nn.Module):
             An (len(node_layers[-1]) x output_dim) tensor of node features.
         """
         out = features
-        for k in range(self.num_layers):
+        for k, layer in range(self.num_layers):
             nodes = node_layers[k + 1]
             mapping = mappings[k]
 
             initial = np.array([mappings[0][v] for v in nodes], dtype=np.int64)
             cur_rows = rows[initial]
 
-            _agg = self.aggregators[k]
-            aggregated = _agg(out, nodes, mapping, cur_rows, self.num_samples)
-            current = np.array([mapping[v] for v in nodes], dtype=np.int64)
-
-            out = torch.cat((out[current, :], aggregated), dim=1)
-            out = self.fcs[k](out)
-
-        out = self.relu(out)
-        out = self.bns[k](out)
-        out = self.dropout(out)
-        out = out.div(out.norm(dim=1, keepdim=True) + 1e-6)
+            out = layer(out, nodes, mapping, cur_rows, self.num_samples)
         return out
