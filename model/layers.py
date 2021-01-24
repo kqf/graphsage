@@ -1,6 +1,5 @@
-import numpy as np
 import torch
-import torch.nn as nn
+import numpy as np
 
 
 class MeanAggregator(torch.nn.Module):
@@ -76,13 +75,13 @@ class MeanAggregator(torch.nn.Module):
         """
         return torch.mean(features, dim=0)
 
-class GraphSAGE(nn.Module):
+class GraphSAGE(torch.nn.Module):
 
     def __init__(
         self,
-        input_dim,
-        hidden_dims,
-        output_dim,
+        input_dim=100,
+        hidden_dims=100,
+        output_dim=100,
         dropout=0.5,
         num_samples=25,
     ):
@@ -108,22 +107,25 @@ class GraphSAGE(nn.Module):
         self.num_samples = num_samples
         self.num_layers = len(hidden_dims) + 1
 
-        self.aggregators = nn.ModuleList(
+        self.aggregators = torch.nn.ModuleList(
             [MeanAggregator(input_dim, input_dim)])
         self.aggregators.extend([MeanAggregator(dim, dim)
                                  for dim in hidden_dims])
 
         c = 2
-        self.fcs = nn.ModuleList([nn.Linear(c * input_dim, hidden_dims[0])])
-        self.fcs.extend([nn.Linear(c * hidden_dims[i - 1], hidden_dims[i])
-                         for i in range(1, len(hidden_dims))])
-        self.fcs.extend([nn.Linear(c * hidden_dims[-1], output_dim)])
+        self.fcs = torch.nn.ModuleList(
+            [torch.nn.Linear(c * input_dim, hidden_dims[0])])
+        self.fcs.extend([
+            torch.nn.Linear(c * hidden_dims[i - 1], hidden_dims[i])
+            for i in range(1, len(hidden_dims))])
+        self.fcs.extend([
+            torch.nn.Linear(c * hidden_dims[-1], output_dim)])
 
-        self.bns = nn.ModuleList([nn.BatchNorm1d(hidden_dim)
-                                  for hidden_dim in hidden_dims])
+        self.bns = torch.nn.ModuleList([torch.nn.BatchNorm1d(hidden_dim)
+                                        for hidden_dim in hidden_dims])
 
-        self.dropout = nn.Dropout(dropout)
-        self.relu = nn.ReLU()
+        self.dropout = torch.nn.Dropout(dropout)
+        self.relu = torch.nn.ReLU()
 
     def forward(self, features, node_layers, mappings, rows):
         """
