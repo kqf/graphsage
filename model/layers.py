@@ -75,6 +75,7 @@ class MeanAggregator(torch.nn.Module):
         """
         return torch.mean(features, dim=0)
 
+
 class SAGEConv(torch.nn.Module):
 
     def __init__(
@@ -138,6 +139,7 @@ class SAGEConv(torch.nn.Module):
         out = out.div(out.norm(dim=1, keepdim=True) + 1e-6)
         return out
 
+
 class GraphSAGE(torch.nn.Module):
 
     def __init__(
@@ -195,6 +197,7 @@ class GraphSAGE(torch.nn.Module):
         out : torch.Tensor
             An (len(node_layers[-1]) x output_dim) tensor of node features.
         """
+
         out = features
         for k, layer in range(self.num_layers):
             nodes = node_layers[k + 1]
