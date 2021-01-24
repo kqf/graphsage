@@ -1,6 +1,5 @@
-import numpy as np
 import torch
-import torch.nn as nn
+import numpy as np
 
 
 class MeanAggregator(torch.nn.Module):
@@ -62,6 +61,7 @@ class MeanAggregator(torch.nn.Module):
         for i in range(n):
             if _len(sampled_rows[i]) != 0:
                 out[i, :] = self._aggregate(features[sampled_rows[i], :])
+        return out
 
     def _aggregate(self, features):
         """
@@ -75,13 +75,13 @@ class MeanAggregator(torch.nn.Module):
         """
         return torch.mean(features, dim=0)
 
-class GraphSAGE(nn.Module):
+class GraphSAGE(torch.nn.Module):
 
     def __init__(
         self,
-        input_dim,
-        hidden_dims,
-        output_dim,
+        input_dim=100,
+        hidden_dims=[100],
+        output_dim=100,
         dropout=0.5,
         num_samples=25,
     ):
@@ -107,22 +107,25 @@ class GraphSAGE(nn.Module):
         self.num_samples = num_samples
         self.num_layers = len(hidden_dims) + 1
 
-        self.aggregators = nn.ModuleList(
+        self.aggregators = torch.nn.ModuleList(
             [MeanAggregator(input_dim, input_dim)])
         self.aggregators.extend([MeanAggregator(dim, dim)
                                  for dim in hidden_dims])
 
-        c = 3
-        self.fcs = nn.ModuleList([nn.Linear(c * input_dim, hidden_dims[0])])
-        self.fcs.extend([nn.Linear(c * hidden_dims[i - 1], hidden_dims[i])
-                         for i in range(1, len(hidden_dims))])
-        self.fcs.extend([nn.Linear(c * hidden_dims[-1], output_dim)])
+        c = 2
+        self.fcs = torch.nn.ModuleList(
+            [torch.nn.Linear(c * input_dim, hidden_dims[0])])
+        self.fcs.extend([
+            torch.nn.Linear(c * hidden_dims[i - 1], hidden_dims[i])
+            for i in range(1, len(hidden_dims))])
+        self.fcs.extend([
+            torch.nn.Linear(c * hidden_dims[-1], output_dim)])
 
-        self.bns = nn.ModuleList([nn.BatchNorm1d(hidden_dim)
-                                  for hidden_dim in hidden_dims])
+        self.bns = torch.nn.ModuleList([torch.nn.BatchNorm1d(hidden_dim)
+                                        for hidden_dim in hidden_dims])
 
-        self.dropout = nn.Dropout(dropout)
-        self.relu = nn.ReLU()
+        self.dropout = torch.nn.Dropout(dropout)
+        self.relu = torch.nn.ReLU()
 
     def forward(self, features, node_layers, mappings, rows):
         """
@@ -147,21 +150,21 @@ class GraphSAGE(nn.Module):
         """
         out = features
         for k in range(self.num_layers):
-            nodes = [k + 1]
+            nodes = node_layers[k + 1]
             mapping = mappings[k]
-            init_mapped_nodes = np.array(
-                [mappings[0][v] for v in nodes], dtype=np.int64)
-            cur_rows = rows[init_mapped_nodes]
-            aggregate = self.aggregators[k](out, nodes, mapping, cur_rows,
-                                            self.num_samples)
-            cur_mapped_nodes = np.array([mapping[v]
-                                         for v in nodes], dtype=np.int64)
-            out = torch.cat((out[cur_mapped_nodes, :], aggregate), dim=1)
-            out = self.fcs[k](out)
-            if k + 1 < self.num_layers:
-                out = self.relu(out)
-                out = self.bns[k](out)
-                out = self.dropout(out)
-                out = out.div(out.norm(dim=1, keepdim=True) + 1e-6)
 
+            initial = np.array([mappings[0][v] for v in nodes], dtype=np.int64)
+            cur_rows = rows[initial]
+
+            _agg = self.aggregators[k]
+            aggregated = _agg(out, nodes, mapping, cur_rows, self.num_samples)
+            current = np.array([mapping[v] for v in nodes], dtype=np.int64)
+
+            out = torch.cat((out[current, :], aggregated), dim=1)
+            out = self.fcs[k](out)
+
+        out = self.relu(out)
+        out = self.bns[k](out)
+        out = self.dropout(out)
+        out = out.div(out.norm(dim=1, keepdim=True) + 1e-6)
         return out
