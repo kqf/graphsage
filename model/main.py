@@ -153,10 +153,12 @@ class GraphSAGE(nn.Module):
 
             initial = np.array([mappings[0][v] for v in nodes], dtype=np.int64)
             cur_rows = rows[initial]
-            aggregate = self.aggregators[k](out, nodes, mapping, cur_rows,
-                                            self.num_samples)
-            cur_mapped_nodes = np.array([mapping[v] for v in nodes], dtype=np.int64)
-            out = torch.cat((out[cur_mapped_nodes, :], aggregate), dim=1)
+
+            _agg = self.aggregators[k]
+            aggregated = _agg(out, nodes, mapping, cur_rows, self.num_samples)
+            current = np.array([mapping[v] for v in nodes], dtype=np.int64)
+
+            out = torch.cat((out[current, :], aggregated), dim=1)
             out = self.fcs[k](out)
 
         out = self.relu(out)
