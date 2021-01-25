@@ -1,5 +1,6 @@
 torch
 torchtext
+torch-scatter
 scikit-learn
 numpy
 pytest
