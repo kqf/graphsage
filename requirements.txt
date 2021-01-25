@@ -1,5 +1,6 @@
 torch
 torchtext
+torch-scatter -f https://pytorch-geometric.com/whl/torch-1.7.0+cu102.html
 scikit-learn
 numpy
 pytest
