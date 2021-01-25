@@ -1,4 +1,6 @@
 torch
+torchtext
+scikit-learn
 numpy
 pytest
 pandas
