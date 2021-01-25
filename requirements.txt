@@ -1,6 +1,6 @@
-torch==1.6.0
+torch
 torchtext
-torch-scatter
+torch-scatter -f https://pytorch-geometric.com/whl/torch-1.7.0+cpu.html
 scikit-learn
 numpy
 pytest
