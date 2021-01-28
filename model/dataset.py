@@ -10,18 +10,22 @@ class GraphDataset(torch.utils.data.Dataset):
         self.labels = labels
 
     def __getitem__(self, idx):
-        return self.features, self.edge_list, idx, self.labels[idx]
+        return idx, self.labels[idx]
 
     def __len__(self):
         return self.features.shape[0]
 
 
-def sample(batch):
-    return batch
+class GraphLoader(torch.utils.data.DataLoader):
+    def __init__(self, dataset, **kwargs):
+        super().__init__(dataset, collate_fn=self.collate_fn, **kwargs)
+
+    def collate_fn(self, batch):
+        return self.dataset.features, self.dataset.edge_list, batch
 
 
 def sampling_iterator(dataset, **kwargs):
-    return torch.utils.data.DataLoader(dataset, collate_fn=sample, **kwargs)
+    return GraphLoader(dataset, **kwargs)
 
 
 def load_cora(path="data/cora"):

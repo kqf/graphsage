@@ -8,5 +8,5 @@ def test_dataset():
         pass
 
     batches = sampling_iterator(dataset, batch_size=64, drop_last=True)
-    for batch in batches:
+    for features, edge_index, batch in batches:
         assert len(batch) == 64
