@@ -12,7 +12,9 @@ def load_cora(path="data/cora"):
         inplace=True,
     )
 
-    x = features.drop(columns=["node", "target"]).values
+    raw = features.drop(columns=["node", "target"])
+    x = raw / raw.mean(axis=1).values[:, None]
+
     y = features["target"].astype("category").cat.codes.values
 
     iton = features["node"].to_list()
