@@ -34,5 +34,5 @@ jobs:
         flake8 . --count --max-complexity=10 --max-line-length=79 --statistics
     - name: Test
       run: |
-        make data
+        make data/cora
         pytest --cov=models tests/
