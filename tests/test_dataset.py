@@ -1,4 +1,4 @@
-from model.dataset import load_cora
+from model.dataset import load_cora, sampling_iterator
 
 
 def test_dataset():
@@ -6,3 +6,7 @@ def test_dataset():
 
     for example in dataset:
         pass
+
+    batches = sampling_iterator(dataset, batch_size=64, drop_last=True)
+    for batch in batches:
+        assert len(batch) == 64

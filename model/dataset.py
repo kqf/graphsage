@@ -16,6 +16,14 @@ class GraphDataset(torch.utils.data.Dataset):
         return self.features.shape[0]
 
 
+def sample(batch):
+    return batch
+
+
+def sampling_iterator(dataset, **kwargs):
+    return torch.utils.data.DataLoader(dataset, collate_fn=sample, **kwargs)
+
+
 def load_cora(path="data/cora"):
     path = pathlib.Path(path)
 
