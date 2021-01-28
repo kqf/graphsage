@@ -1,5 +1,31 @@
+import torch
 import pandas as pd
 import pathlib
+
+
+class GraphDataset(torch.utils.data.Dataset):
+    def __init__(self, features, edge_list, labels):
+        self.features = features
+        self.edge_list = edge_list
+        self.labels = labels
+
+    def __getitem__(self, idx):
+        return idx, self.labels[idx]
+
+    def __len__(self):
+        return self.features.shape[0]
+
+
+class GraphLoader(torch.utils.data.DataLoader):
+    def __init__(self, dataset, **kwargs):
+        super().__init__(dataset, collate_fn=self.collate_fn, **kwargs)
+
+    def collate_fn(self, batch):
+        return self.dataset.features, self.dataset.edge_list, batch
+
+
+def sampling_iterator(dataset, **kwargs):
+    return GraphLoader(dataset, **kwargs)
 
 
 def load_cora(path="data/cora"):
@@ -25,4 +51,4 @@ def load_cora(path="data/cora"):
     df["target"] = df["target"].map(ntoi)
 
     edge_list = df.values
-    return x, edge_list, y
+    return GraphDataset(x, edge_list, y)
