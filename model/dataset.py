@@ -1,6 +1,10 @@
 import torch
-import pandas as pd
 import pathlib
+
+import numpy as np
+import pandas as pd
+
+from functools import partial
 
 
 class GraphDataset(torch.utils.data.Dataset):
@@ -16,12 +20,37 @@ class GraphDataset(torch.utils.data.Dataset):
         return self.features.shape[0]
 
 
+def choice(seq, size):
+    return np.random.choice(size, min(len(seq), size)).tolist()
+
+
+def sample_edges(nodes, edge_list, size):
+    mask = np.isin(edge_list[:, 0], nodes)
+    candidates = pd.DataFrame(edge_list[mask], columns=["source", "target"])
+    sampled = candidates.groupby("source").agg(partial(choice, size=size))
+    edges_sublist = sampled.explode("target").reset_index()
+
+    un = edges_sublist["target"].unique()
+    new_nodes = np.unique(np.concatenate([nodes, un]))
+    return new_nodes, edges_sublist
+
+
 class GraphLoader(torch.utils.data.DataLoader):
-    def __init__(self, dataset, **kwargs):
+    def __init__(self, dataset, sizes=[10], **kwargs):
         super().__init__(dataset, collate_fn=self.collate_fn, **kwargs)
+        self.sizes = sizes
 
     def collate_fn(self, batch):
-        return self.dataset.features, self.dataset.edge_list, batch
+        reverse_layers = []
+        batch = np.array(batch)
+
+        nodes = batch[:, 0]
+        for size in self.sizes:
+            nodes, edges = sample_edges(nodes, self.dataset.edge_list, size)
+            reverse_layers.append([nodes, edges])
+
+        layers = reverse_layers[::-1]
+        return self.dataset.features, batch, layers
 
 
 def sampling_iterator(dataset, **kwargs):
