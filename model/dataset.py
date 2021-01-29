@@ -25,9 +25,8 @@ def choice(seq, size):
 
 
 def sample_edges(nodes, edge_list, size):
-    mask = np.isin(edge_list[:, 0], nodes)
-    candidates = pd.DataFrame(edge_list[mask], columns=["source", "target"])
-    sampled = candidates.groupby("source").agg(partial(choice, size=size))
+    mask = edge_list["source"].isin(nodes)
+    sampled = edge_list[mask].groupby("source").agg(partial(choice, size=size))
     edges_sublist = sampled.explode("target").reset_index()
 
     un = edges_sublist["target"].unique()
@@ -79,5 +78,5 @@ def load_cora(path="data/cora"):
     df["source"] = df["source"].map(ntoi)
     df["target"] = df["target"].map(ntoi)
 
-    edge_list = df.values
+    edge_list = df
     return GraphDataset(x, edge_list, y)
