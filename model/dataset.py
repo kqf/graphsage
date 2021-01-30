@@ -54,10 +54,10 @@ class GraphLoader(torch.utils.data.DataLoader):
 
         layers = reverse_layers[::-1]
 
-        all_nodes, batch, layers = self.to_local(batch[:, 0], layers)
         y = batch[:, 1]
+        all_nodes, batch, layers = self.to_local(batch[:, 0], layers)
 
-        return (self.dataset.features[all_nodes], batch, layers), y
+        return (self.dataset.features.iloc[all_nodes], batch, layers), y
 
     def to_local(self, batch, layers):
         # Calculate unique indices
@@ -77,7 +77,7 @@ class GraphLoader(torch.utils.data.DataLoader):
             edges["target"] = edges["target"].map(node2index)
             local_layers.append([lnodes, edges])
 
-        return np.unique(uniq), amap(batch), local_layers
+        return np.unique(list(uniq)), amap(batch, node2index), local_layers
 
 
 def sampling_iterator(dataset, **kwargs):
