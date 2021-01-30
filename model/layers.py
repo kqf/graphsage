@@ -18,11 +18,14 @@ class SAGEConv(torch.nn.Module):
         self.dropout = torch.nn.Dropout(dropout)
         self.relu = torch.nn.ReLU()
 
-    def forward(self, features, edge_index):
+    def forward(self, features, batch, edge_index):
         sources, targets = edge_index
 
-        aggregated = scatter(features[targets], sources, dim=0)
-        out = torch.cat((features, aggregated), dim=1)
+        size = features.shape[0]
+
+        aggregated = scatter(features[targets], sources, dim=0, dim_size=size)
+
+        out = torch.cat((features[batch], aggregated[batch]), dim=1)
         out = self.fcs(out)
         out = self.relu(out)
         out = self.bns(out)
