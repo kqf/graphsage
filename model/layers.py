@@ -18,11 +18,14 @@ class SAGEConv(torch.nn.Module):
         self.dropout = torch.nn.Dropout(dropout)
         self.relu = torch.nn.ReLU()
 
-    def forward(self, features, edge_index):
+    def forward(self, features, batch, edge_index):
         sources, targets = edge_index
 
-        aggregated = scatter(features[sources], targets)
-        out = torch.cat((features[sources], aggregated), dim=1)
+        size = features.shape[0]
+
+        aggregated = scatter(features[targets], sources, dim=0, dim_size=size)
+
+        out = torch.cat((features[batch], aggregated[batch]), dim=1)
         out = self.fcs(out)
         out = self.relu(out)
         out = self.bns(out)
@@ -53,7 +56,7 @@ class GraphSAGE(torch.nn.Module):
             SAGEConv(fin, fout) for fin, fout in zip(sizes[:-1], sizes[1:])
         ])
 
-    def forward(self, features, batch, edges):
+    def forward(self, features, edges):
         out = features
         for layer, edge_index in zip(self.layers, edges):
             out = layer(features, edge_index)
