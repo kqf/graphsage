@@ -24,6 +24,10 @@ def choice(seq, size):
     return np.random.choice(size, min(len(seq), size)).tolist()
 
 
+def amap(seq, mapping):
+    return np.array(list(map(mapping.get, seq)))
+
+
 def sample_edges(nodes, edge_list, size):
     mask = edge_list["source"].isin(nodes)
     sampled = edge_list[mask].groupby("source").agg(partial(choice, size=size))
@@ -49,7 +53,31 @@ class GraphLoader(torch.utils.data.DataLoader):
             reverse_layers.append([nodes, edges])
 
         layers = reverse_layers[::-1]
-        return self.dataset.features, batch, layers
+
+        all_nodes, batch, layers = self.to_local(batch[:, 0], layers)
+        y = batch[:, 1]
+
+        return (self.dataset.features[all_nodes], batch, layers), y
+
+    def to_local(self, batch, layers):
+        # Calculate unique indices
+        uniq = set()
+        uniq.update(batch.reshape(-1))
+        for _, edges in layers:
+            uniq.update(edges.values.reshape(-1))
+
+        # The local mapping
+        node2index = {v: i for i, v in enumerate(uniq)}
+
+        # New datastructure to local mapping
+        local_layers = []
+        for nodes, edges in layers:
+            lnodes = amap(nodes, node2index)
+            edges["source"] = edges["source"].map(node2index)
+            edges["target"] = edges["target"].map(node2index)
+            local_layers.append([lnodes, edges])
+
+        return np.unique(uniq), amap(batch), local_layers
 
 
 def sampling_iterator(dataset, **kwargs):
