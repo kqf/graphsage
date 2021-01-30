@@ -21,8 +21,8 @@ class SAGEConv(torch.nn.Module):
     def forward(self, features, edge_index):
         sources, targets = edge_index
 
-        aggregated = scatter(features, targets.T, dim=0)
-        out = torch.cat((features[sources], aggregated), dim=1)
+        aggregated = scatter(features[targets], sources, dim=0)
+        out = torch.cat((features, aggregated), dim=1)
         out = self.fcs(out)
         out = self.relu(out)
         out = self.bns(out)
