@@ -21,7 +21,7 @@ class SAGEConv(torch.nn.Module):
     def forward(self, features, edge_index):
         sources, targets = edge_index
 
-        aggregated = scatter(features[sources], targets)
+        aggregated = scatter(features, targets.T, dim=0)
         out = torch.cat((features[sources], aggregated), dim=1)
         out = self.fcs(out)
         out = self.relu(out)
@@ -53,7 +53,7 @@ class GraphSAGE(torch.nn.Module):
             SAGEConv(fin, fout) for fin, fout in zip(sizes[:-1], sizes[1:])
         ])
 
-    def forward(self, features, batch, edges):
+    def forward(self, features, edges):
         out = features
         for layer, edge_index in zip(self.layers, edges):
             out = layer(features, edge_index)
