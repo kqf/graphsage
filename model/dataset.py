@@ -28,6 +28,10 @@ def amap(seq, mapping):
     return np.array(list(map(mapping.get, seq)))
 
 
+def to_batch(features, all_nodes, layers):
+    return torch.tensor(features), torch.tensor(all_nodes), layers
+
+
 def sample_edges(nodes, edge_list, size):
     mask = edge_list["source"].isin(nodes)
     sampled = edge_list[mask].groupby("source").agg(partial(choice, size=size))
@@ -57,7 +61,8 @@ class GraphLoader(torch.utils.data.DataLoader):
         y = batch[:, 1]
         all_nodes, batch, layers = self.to_local(batch[:, 0], layers)
 
-        return (self.dataset.features.iloc[all_nodes], batch, layers), y
+        x = self.dataset.features.iloc[all_nodes].values
+        return to_batch(x, batch, layers), y
 
     def to_local(self, batch, layers):
         # Calculate unique indices
