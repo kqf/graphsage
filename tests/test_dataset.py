@@ -8,5 +8,5 @@ def test_dataset():
         pass
 
     batches = sampling_iterator(dataset, batch_size=64, drop_last=True)
-    for features, batch, layers in batches:
+    for (features, batch, layers), y in batches:
         assert len(batch) == 64
