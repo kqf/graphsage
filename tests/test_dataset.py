@@ -10,3 +10,5 @@ def test_dataset():
     batches = sampling_iterator(dataset, batch_size=64, drop_last=True)
     for batch, y in batches:
         assert len(batch["nodes"]) == 64
+        assert "layers" in batch
+        assert "features" in batch
