@@ -1,8 +1,7 @@
 import torch
 import skorch
-from skorch.toy import MLPModule
 
-
+from model.layers import GraphSAGE
 from model.dataset import GraphLoader
 
 
@@ -13,8 +12,8 @@ def init(w):
 
 
 def build_model(max_epochs=2, logdir=".tmp/", train_split=None):
-    model = skorch.NeuralNetClassifier(
-        MLPModule,
+    model = skorch.NeuralNet(
+        GraphSAGE,
         criterion=torch.nn.CrossEntropyLoss,
         batch_size=32,
         max_epochs=max_epochs,
