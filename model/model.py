@@ -16,7 +16,7 @@ def build_model(max_epochs=2, logdir=".tmp/", train_split=None):
     model = skorch.NeuralNetClassifier(
         MLPModule,
         criterion=torch.nn.CrossEntropyLoss,
-        batch_size=32,
+        batch_size=64,
         max_epochs=max_epochs,
         # optimizer__momentum=0.9,
         iterator_train=GraphLoader,
