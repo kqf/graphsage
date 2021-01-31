@@ -1,5 +1,6 @@
 import torch
 import skorch
+from skorch.toy import MLPModule
 
 
 from model.dataset import GraphLoader
@@ -13,10 +14,8 @@ def init(w):
 
 def build_model(max_epochs=2, logdir=".tmp/", train_split=None):
     model = skorch.NeuralNetClassifier(
-        # ResUNet,
-        module__pretrained=False,
+        MLPModule,
         criterion=torch.nn.CrossEntropyLoss,
-        criterion__padding=0,
         batch_size=32,
         max_epochs=max_epochs,
         # optimizer__momentum=0.9,

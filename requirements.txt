@@ -2,6 +2,7 @@ torch
 torchtext
 torch-scatter
 scikit-learn
+skorch
 numpy
 pytest
 pandas
