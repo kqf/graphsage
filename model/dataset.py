@@ -29,7 +29,17 @@ def amap(seq, mapping):
 
 
 def to_batch(features, all_nodes, layers):
-    return torch.tensor(features), torch.tensor(all_nodes), layers
+    tensors = []
+    for nodes, edges in layers:
+        tnodes = torch.tensor(nodes, dtype=torch.int32)
+        tedges = torch.tensor(edges.values, dtype=torch.int32)
+        tensors.append([tnodes, tedges])
+
+    batch = {}
+    batch["features"] = torch.tensor(features)
+    batch["nodes"] = torch.tensor(all_nodes, dtype=torch.int32)
+    batch["layers"] = tensors
+    return batch
 
 
 def sample_edges(nodes, edge_list, size):
