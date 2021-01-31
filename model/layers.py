@@ -56,8 +56,9 @@ class GraphSAGE(torch.nn.Module):
             SAGEConv(fin, fout) for fin, fout in zip(sizes[:-1], sizes[1:])
         ])
 
-    def forward(self, features, edges):
+    def forward(self, features, nodes, layers):
         out = features
-        for layer, edge_index in zip(self.layers, edges):
-            out = layer(features, edge_index)
-        return out
+        for layer, (_nodes, edge_index) in zip(self.layers, layers):
+            out = layer(features, _nodes.T.long(), edge_index.T.long())
+
+        return self._fc(out[nodes])
