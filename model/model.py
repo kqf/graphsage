@@ -14,6 +14,7 @@ def init(w):
 def build_model(max_epochs=2, logdir=".tmp/", train_split=None):
     model = skorch.NeuralNet(
         GraphSAGE,
+        module__input_dim=1433,
         criterion=torch.nn.CrossEntropyLoss,
         batch_size=32,
         max_epochs=max_epochs,

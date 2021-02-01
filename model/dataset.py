@@ -36,7 +36,7 @@ def to_batch(features, all_nodes, layers):
         tensors.append([tnodes, tedges])
 
     batch = {}
-    batch["features"] = torch.tensor(features)
+    batch["features"] = torch.tensor(features, dtype=torch.float32)
     batch["nodes"] = torch.tensor(all_nodes, dtype=torch.int32)
     batch["layers"] = tensors
     return batch
