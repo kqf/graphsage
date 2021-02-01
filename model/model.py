@@ -1,6 +1,10 @@
 import torch
 import skorch
 
+from skorch.dataset import get_len
+from skorch.dataset import unpack_data
+from skorch.dataset import uses_placeholder_y
+
 from model.layers import GraphSAGE
 from model.dataset import GraphLoader
 
@@ -11,8 +15,28 @@ def init(w):
     return torch.nn.init.xavier_uniform_(w)
 
 
+class GraphNet(skorch.NeuralNet):
+    def run_single_epoch(
+            self, dataset, training, prefix, step_fn, **fit_params):
+        is_placeholder_y = uses_placeholder_y(dataset)
+
+        batch_count = 0
+        for data in self.get_iterator(dataset, training=training):
+            Xi, yi = unpack_data(data)
+            yi_res = yi if not is_placeholder_y else None
+            self.notify("on_batch_begin", X=Xi, y=yi_res, training=training)
+            step = step_fn(Xi, yi, **fit_params)
+            self.history.record_batch(prefix + "_loss", step["loss"].item())
+            self.history.record_batch(prefix + "_batch_size",
+                                      get_len(Xi["nodes"]))
+            self.notify("on_batch_end", X=Xi, y=yi_res,
+                        training=training, **step)
+            batch_count += 1
+        self.history.record(prefix + "_batch_count", batch_count)
+
+
 def build_model(max_epochs=2, logdir=".tmp/", train_split=None):
-    model = skorch.NeuralNet(
+    model = GraphNet(
         GraphSAGE,
         module__input_dim=1433,
         criterion=torch.nn.CrossEntropyLoss,
