@@ -57,6 +57,7 @@ class GraphSAGE(torch.nn.Module):
         ])
 
     def forward(self, features, nodes, layers):
+        import ipdb; ipdb.set_trace(); import IPython; IPython.embed() # noq
         out = features
         for layer, (_nodes, edge_index) in zip(self.layers, layers):
             out = layer(features, _nodes.T.long(), edge_index.T.long())
