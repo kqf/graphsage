@@ -55,9 +55,9 @@ class GraphSAGE(torch.nn.Module):
         self.layers = torch.nn.ModuleList([
             SAGEConv(fin, fout) for fin, fout in zip(sizes[:-1], sizes[1:])
         ])
+        self._fc = torch.nn.Identity()
 
     def forward(self, features, nodes, layers):
-        import ipdb; ipdb.set_trace(); import IPython; IPython.embed() # noq
         out = features
         for layer, (_nodes, edge_index) in zip(self.layers, layers):
             out = layer(features, _nodes.T.long(), edge_index.T.long())
