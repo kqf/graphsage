@@ -5,8 +5,8 @@ from skorch.dataset import get_len
 from skorch.dataset import unpack_data
 from skorch.dataset import uses_placeholder_y
 
-from model.layers import GraphSAGE
-from model.dataset import GraphLoader
+from graphsage.layers import GraphSAGE
+from graphsage.dataset import GraphLoader
 
 
 def init(w):

@@ -1,6 +1,6 @@
 import torch
 import pytest
-from model.layers import SAGEConv
+from graphsage.layers import SAGEConv
 
 
 @pytest.fixture
