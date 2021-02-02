@@ -1,5 +1,5 @@
 train:
-	python model/main.py
+	python graphsage/main.py
 
 data/cora:
 	git clone https://github.com/tkipf/pygcn.git

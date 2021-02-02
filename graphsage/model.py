@@ -40,7 +40,7 @@ def build_model(max_epochs=2, logdir=".tmp/", train_split=None):
         GraphSAGE,
         module__input_dim=1433,
         criterion=torch.nn.CrossEntropyLoss,
-        batch_size=32,
+        batch_size=256,
         max_epochs=max_epochs,
         # optimizer__momentum=0.9,
         iterator_train=GraphLoader,
