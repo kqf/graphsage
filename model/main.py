@@ -1,15 +1,11 @@
-from model.dataset import load_cora, sampling_iterator
-from model.layers import GraphSAGE
+from model.model import build_model
+from model.dataset import load_cora
 
 
 def main():
-    dataset = load_cora()
-
-    model = GraphSAGE()
-
-    batches = sampling_iterator(dataset, batch_size=64)
-    for batch in batches:
-        model.forward(*batches)
+    data = load_cora()
+    model = build_model(max_epochs=20)
+    model.fit(data)
 
 
 if __name__ == '__main__':
