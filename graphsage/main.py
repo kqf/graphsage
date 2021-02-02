@@ -1,5 +1,5 @@
-from model.dataset import load_cora
-from model.model import build_model
+from graphsage.dataset import load_cora
+from graphsage.model import build_model
 
 
 def main():

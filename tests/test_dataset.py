@@ -1,4 +1,4 @@
-from model.dataset import load_cora, sampling_iterator
+from graphsage.dataset import load_cora, sampling_iterator
 
 
 def test_dataset():
