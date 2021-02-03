@@ -60,5 +60,5 @@ class GraphSAGE(torch.nn.Module):
     def forward(self, features, nodes, layers):
         out = features
         for layer, (_nodes, edge_index) in zip(self.layers, layers):
-            out = layer(features, _nodes.T.long(), edge_index.T.long())
+            out = layer(out, _nodes.T.long(), edge_index.T.long())
         return self._fc(out[nodes.long()])
