@@ -31,13 +31,13 @@ def amap(seq, mapping):
 def to_batch(features, all_nodes, layers):
     tensors = []
     for nodes, edges in layers:
-        tnodes = torch.tensor(nodes, dtype=torch.int32)
-        tedges = torch.tensor(edges.values, dtype=torch.int32)
+        tnodes = torch.tensor(nodes, dtype=torch.int64)
+        tedges = torch.tensor(edges.values, dtype=torch.int64)
         tensors.append([tnodes, tedges])
 
     batch = {}
     batch["features"] = torch.tensor(features, dtype=torch.float32)
-    batch["nodes"] = torch.tensor(all_nodes, dtype=torch.int32)
+    batch["nodes"] = torch.tensor(all_nodes, dtype=torch.int64)
     batch["layers"] = tensors
     return batch
 
