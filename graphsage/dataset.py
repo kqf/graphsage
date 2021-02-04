@@ -1,5 +1,6 @@
 import torch
 import pathlib
+import random
 
 import numpy as np
 import pandas as pd
@@ -53,10 +54,11 @@ def sample_edges(nodes, edge_list, size):
 
 
 def sample_nodes(nodes, edge_list):
-    import ipdb; ipdb.set_trace(); import IPython; IPython.embed() # noqa
-    mask = edge_list["source"].isin(nodes)
-    sampled = edge_list[mask].groupby("source").agg(partial(choice, size=1))
-    return sampled.explode("target")['target'].values
+    # mask = edge_list["source"].isin(nodes)
+    # sampled = edge_list[mask].groupby("source").agg(list)
+    # sampled["target"] = sampled["target"].apply(random.choice).values
+    positives = np.random.randint(0, max(edge_list.max()), nodes.shape)
+    return positives
 
 
 class GraphLoader(torch.utils.data.DataLoader):
@@ -65,9 +67,12 @@ class GraphLoader(torch.utils.data.DataLoader):
         self.sizes = sizes
 
     def collate_fn(self, batch):
+        batch, y = zip(*batch)
+        return self.collate_batch(batch), y
+
+    def collate_batch(self, batch):
         reverse_layers = []
 
-        batch, y = zip(*batch)
         batch = np.array(batch)
 
         nodes = batch
@@ -80,7 +85,7 @@ class GraphLoader(torch.utils.data.DataLoader):
         all_nodes, batch, layers = self.to_local(batch, layers)
 
         x = self.dataset.features.iloc[all_nodes].values
-        return to_batch(x, batch, layers), y
+        return to_batch(x, batch, layers)
 
     def to_local(self, batch, layers):
         # Calculate unique indices
@@ -104,12 +109,12 @@ class GraphLoader(torch.utils.data.DataLoader):
 
 
 class NegativeGraphLoader(GraphLoader):
-    def collate_fn(self, batch):
+    def collate_batch(self, batch):
         batch = np.array(batch)
         positives = sample_nodes(batch, self.dataset.edge_list)
         negatives = np.random.randint(0, len(self.dataset), batch.shape)
-        new_batch = np.concatenate([batch, negatives, positives])
-        return super().collate_fn(new_batch)
+        full = np.concatenate([batch, negatives, positives])
+        return super().collate_batch(full)
 
 
 def sampling_iterator(dataset, negatives=False, **kwargs):

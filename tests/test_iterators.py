@@ -1,4 +1,3 @@
-import pytest
 from graphsage.dataset import sampling_iterator
 
 
@@ -10,7 +9,6 @@ def test_iterator(data):
         assert "features" in batch
 
 
-@pytest.mark.skip
 def test_negative_sampling(data):
 
     batches = sampling_iterator(
@@ -21,6 +19,6 @@ def test_negative_sampling(data):
     )
 
     for batch, y in batches:
-        assert len(batch["nodes"]) == 64 * 2
+        assert len(batch["nodes"]) == 64 * 3
         assert "layers" in batch
         assert "features" in batch
