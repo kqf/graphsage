@@ -1,24 +1,18 @@
-from graphsage.dataset import load_cora, sampling_iterator
+from graphsage.dataset import sampling_iterator
 
 
-def test_dataset():
-    dataset = load_cora()
-
-    for example in dataset:
-        pass
-
-    batches = sampling_iterator(dataset, batch_size=64, drop_last=True)
+def test_iterator(data):
+    batches = sampling_iterator(data, batch_size=64, drop_last=True)
     for batch, y in batches:
         assert len(batch["nodes"]) == 64
         assert "layers" in batch
         assert "features" in batch
 
 
-def test_negative_sampling():
-    dataset = load_cora()
+def test_negative_sampling(data):
 
     batches = sampling_iterator(
-        dataset,
+        data,
         negatives=True,
         batch_size=64,
         drop_last=True
