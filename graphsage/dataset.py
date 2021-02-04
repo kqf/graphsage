@@ -95,7 +95,17 @@ class GraphLoader(torch.utils.data.DataLoader):
         return np.unique(list(uniq)), amap(batch, node2index), local_layers
 
 
-def sampling_iterator(dataset, **kwargs):
+class NegativeGraphLoader(GraphLoader):
+    def collate_fn(self, batch):
+        batch = np.array(batch)
+        negatives = np.random.randint(0, len(self.dataset), batch.shape)
+        new_batch = np.concatenate([batch, negatives])
+        return super().collate_fn(new_batch)
+
+
+def sampling_iterator(dataset, negatives=False, **kwargs):
+    if negatives:
+        return NegativeGraphLoader(dataset, **kwargs)
     return GraphLoader(dataset, **kwargs)
 
 
