@@ -52,6 +52,12 @@ def sample_edges(nodes, edge_list, size):
     return new_nodes, edges_sublist
 
 
+def sample_nodes(nodes, edge_list):
+    mask = edge_list["source"].isin(nodes)
+    sampled = edge_list[mask].groupby("source").agg(partial(choice, size=1))
+    return sampled.explode("target").values
+
+
 class GraphLoader(torch.utils.data.DataLoader):
     def __init__(self, dataset, sizes=[10], **kwargs):
         super().__init__(dataset, collate_fn=self.collate_fn, **kwargs)
