@@ -53,9 +53,10 @@ def sample_edges(nodes, edge_list, size):
 
 
 def sample_nodes(nodes, edge_list):
+    import ipdb; ipdb.set_trace(); import IPython; IPython.embed() # noqa
     mask = edge_list["source"].isin(nodes)
     sampled = edge_list[mask].groupby("source").agg(partial(choice, size=1))
-    return sampled.explode("target").values
+    return sampled.explode("target")['target'].values
 
 
 class GraphLoader(torch.utils.data.DataLoader):
@@ -65,17 +66,18 @@ class GraphLoader(torch.utils.data.DataLoader):
 
     def collate_fn(self, batch):
         reverse_layers = []
+
+        batch, y = zip(*batch)
         batch = np.array(batch)
 
-        nodes = batch[:, 0]
+        nodes = batch
         for size in self.sizes:
             nodes, edges = sample_edges(nodes, self.dataset.edge_list, size)
             reverse_layers.append([nodes, edges])
 
         layers = reverse_layers[::-1]
 
-        y = batch[:, 1]
-        all_nodes, batch, layers = self.to_local(batch[:, 0], layers)
+        all_nodes, batch, layers = self.to_local(batch, layers)
 
         x = self.dataset.features.iloc[all_nodes].values
         return to_batch(x, batch, layers), y
@@ -104,8 +106,9 @@ class GraphLoader(torch.utils.data.DataLoader):
 class NegativeGraphLoader(GraphLoader):
     def collate_fn(self, batch):
         batch = np.array(batch)
+        positives = sample_nodes(batch, self.dataset.edge_list)
         negatives = np.random.randint(0, len(self.dataset), batch.shape)
-        new_batch = np.concatenate([batch, negatives])
+        new_batch = np.concatenate([batch, negatives, positives])
         return super().collate_fn(new_batch)
 
 

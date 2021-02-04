@@ -1,3 +1,4 @@
+import pytest
 from graphsage.dataset import sampling_iterator
 
 
@@ -9,6 +10,7 @@ def test_iterator(data):
         assert "features" in batch
 
 
+@pytest.mark.skip
 def test_negative_sampling(data):
 
     batches = sampling_iterator(
