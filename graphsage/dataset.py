@@ -1,6 +1,5 @@
 import torch
 import pathlib
-import random
 
 import numpy as np
 import pandas as pd
@@ -68,7 +67,7 @@ class GraphLoader(torch.utils.data.DataLoader):
 
     def collate_fn(self, batch):
         batch, y = zip(*batch)
-        return self.collate_batch(batch), y
+        return self.collate_batch(batch), torch.tensor(y).long()
 
     def collate_batch(self, batch):
         reverse_layers = []
