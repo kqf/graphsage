@@ -9,6 +9,10 @@ def vectors(batch_size=64, size=100):
     return torch.rand((batch_size, size))
 
 
-def test_loss(vectors):
-    loss = TripletLoss(margin=0.5)
-    assert loss(vectors, vectors, vectors) == 0.5
+@pytest.mark.parametrize("reduction, result", [
+    ("mean", 0.5),
+    ("sum", 32.0),
+])
+def test_loss(vectors, result, reduction):
+    loss = TripletLoss(margin=0.5, reduction=reduction)
+    assert loss(vectors, vectors, vectors) == result
