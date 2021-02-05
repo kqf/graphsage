@@ -7,6 +7,7 @@ from skorch.dataset import uses_placeholder_y
 
 from graphsage.layers import GraphSAGE
 from graphsage.dataset import GraphLoader
+from graphsage.losses import TripletLoss
 
 
 def init(w):
@@ -39,7 +40,7 @@ def build_model(max_epochs=2, logdir=".tmp/", train_split=None):
     model = GraphNet(
         GraphSAGE,
         module__input_dim=1433,
-        criterion=torch.nn.CrossEntropyLoss,
+        criterion=TripletLoss,
         batch_size=256,
         max_epochs=max_epochs,
         # optimizer__momentum=0.9,
