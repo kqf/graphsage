@@ -6,7 +6,7 @@ from skorch.dataset import unpack_data
 from skorch.dataset import uses_placeholder_y
 
 from graphsage.layers import GraphSAGE
-from graphsage.dataset import NegativeGraphLoader
+from graphsage.dataset import NegativeGraphLoader, GraphLoader
 from graphsage.losses import TripletLoss
 
 
@@ -58,6 +58,31 @@ def build_model(max_epochs=2, logdir=".tmp/", train_split=None):
         iterator_train__shuffle=True,
         iterator_train__num_workers=4,
         iterator_valid=NegativeGraphLoader,
+        iterator_valid__shuffle=False,
+        iterator_valid__num_workers=4,
+        train_split=train_split,
+        callbacks=[
+            skorch.callbacks.ProgressBar(),
+            skorch.callbacks.Initializer("*", init),
+        ],
+        device=torch.device("cuda" if torch.cuda.is_available() else "cpu"),
+    )
+
+    return model
+
+
+def build_supervised_model(max_epochs=2, logdir=".tmp/", train_split=None):
+    model = UnsupervisedGraphNet(
+        GraphSAGE,
+        module__input_dim=1433,
+        criterion=torch.nn.CrossEntropyLoss,
+        batch_size=256,
+        max_epochs=max_epochs,
+        # optimizer__momentum=0.9,
+        iterator_train=GraphLoader,
+        iterator_train__shuffle=True,
+        iterator_train__num_workers=4,
+        iterator_valid=GraphLoader,
         iterator_valid__shuffle=False,
         iterator_valid__num_workers=4,
         train_split=train_split,
