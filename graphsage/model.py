@@ -6,7 +6,7 @@ from skorch.dataset import unpack_data
 from skorch.dataset import uses_placeholder_y
 
 from graphsage.layers import GraphSAGE
-from graphsage.dataset import GraphLoader
+from graphsage.dataset import NegativeGraphLoader
 from graphsage.losses import TripletLoss
 
 
@@ -53,10 +53,10 @@ def build_model(max_epochs=2, logdir=".tmp/", train_split=None):
         batch_size=256,
         max_epochs=max_epochs,
         # optimizer__momentum=0.9,
-        iterator_train=GraphLoader,
+        iterator_train=NegativeGraphLoader,
         iterator_train__shuffle=True,
         iterator_train__num_workers=4,
-        iterator_valid=GraphLoader,
+        iterator_valid=NegativeGraphLoader,
         iterator_valid__shuffle=False,
         iterator_valid__num_workers=4,
         train_split=train_split,
