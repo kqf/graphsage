@@ -2,7 +2,7 @@ import torch
 
 
 class TripletLoss(torch.nn.Module):
-    def __init__(self, margin, reduction="mean"):
+    def __init__(self, margin=0.5, reduction="mean"):
         super(TripletLoss, self).__init__()
         self.margin = margin
         self.sum_reduction = reduction == "sum"
