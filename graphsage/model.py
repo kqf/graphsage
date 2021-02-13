@@ -36,8 +36,17 @@ class GraphNet(skorch.NeuralNet):
         self.history.record(prefix + "_batch_count", batch_count)
 
 
+class UnsupervisedGraphNet(GraphNet):
+    def get_loss(self, y_pred, y_true, X=None, training=False):
+
+        if isinstance(self.criterion_, torch.nn.Module):
+            self.criterion_.train(training)
+
+        return self.criterion_(y_pred, y_pred, y_pred)
+
+
 def build_model(max_epochs=2, logdir=".tmp/", train_split=None):
-    model = GraphNet(
+    model = UnsupervisedGraphNet(
         GraphSAGE,
         module__input_dim=1433,
         criterion=TripletLoss,
