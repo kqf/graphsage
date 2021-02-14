@@ -1,8 +1,8 @@
-from graphsage.dataset import sampling_iterator
+from graphsage.dataset import GraphLoader, NegativeGraphLoader
 
 
 def test_iterator(data):
-    batches = sampling_iterator(data, batch_size=64, drop_last=True)
+    batches = GraphLoader(data, batch_size=64, drop_last=True)
     for batch, y in batches:
         assert len(batch["nodes"]) == 64
         assert "layers" in batch
@@ -11,9 +11,8 @@ def test_iterator(data):
 
 def test_negative_sampling(data):
 
-    batches = sampling_iterator(
+    batches = NegativeGraphLoader(
         data,
-        negatives=True,
         batch_size=64,
         drop_last=True
     )
