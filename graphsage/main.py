@@ -5,7 +5,7 @@ from graphsage.model import build_model
 def main():
     data = load_cora()
     model = build_model(
-        max_epochs=20
+        max_epochs=30
     )
     model.fit(data)
 
