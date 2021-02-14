@@ -53,7 +53,8 @@ class GraphSAGE(torch.nn.Module):
         sizes = [input_dim] + hidden_dims + [output_dim]
 
         self.layers = torch.nn.ModuleList([
-            SAGEConv(fin, fout) for fin, fout in zip(sizes[:-1], sizes[1:])
+            SAGEConv(fin, fout, dropout=dropout)
+            for fin, fout in zip(sizes[:-1], sizes[1:])
         ])
         self._fc = torch.nn.Identity()
 
