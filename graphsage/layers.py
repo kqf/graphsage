@@ -10,7 +10,6 @@ class SAGEConv(torch.nn.Module):
         hidden_dims=100,
         output_dim=100,
         dropout=0.5,
-        num_samples=25,
     ):
         super().__init__()
         self.fcs = torch.nn.Linear(2 * input_dim, output_dim)
@@ -42,7 +41,6 @@ class GraphSAGE(torch.nn.Module):
         hidden_dims=[100],
         output_dim=100,
         dropout=0.5,
-        num_samples=25,
     ):
         super().__init__()
 
