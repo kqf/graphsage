@@ -61,3 +61,13 @@ class GraphSAGE(torch.nn.Module):
         for layer, (_nodes, edge_index) in zip(self.layers, layers):
             out = layer(out, _nodes.T, edge_index.T)
         return self._fc(out[nodes])
+
+
+class GraphSAGEClassifier(torch.nn.Module):
+    def __init__(self, n_classes, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._logits = torch.nn.Linear(self.output_dim, n_classes)
+
+    def forward(self, features, batch, edge_index):
+        x = super().forward(features, batch, edge_index)
+        return self._logits(x)
