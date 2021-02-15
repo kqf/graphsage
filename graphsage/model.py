@@ -5,7 +5,7 @@ from skorch.dataset import get_len
 from skorch.dataset import unpack_data
 from skorch.dataset import uses_placeholder_y
 
-from graphsage.layers import GraphSAGE
+from graphsage.layers import GraphSAGE, GraphSAGEClassifier
 from graphsage.dataset import NegativeGraphLoader, GraphLoader
 from graphsage.losses import TripletLoss
 
@@ -48,7 +48,7 @@ class UnsupervisedGraphNet(GraphNet):
 
 def build_model(max_epochs=2, logdir=".tmp/", train_split=None):
     model = UnsupervisedGraphNet(
-        GraphSAGE,
+        GraphSAGEClassifier,
         module__input_dim=1433,
         criterion=TripletLoss,
         batch_size=512,
@@ -74,6 +74,7 @@ def build_supervised_model(max_epochs=2, logdir=".tmp/", train_split=None):
     model = UnsupervisedGraphNet(
         GraphSAGE,
         module__input_dim=1433,
+        module_n_classes=100,
         criterion=torch.nn.CrossEntropyLoss,
         batch_size=256,
         max_epochs=max_epochs,
