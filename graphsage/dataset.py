@@ -116,12 +116,6 @@ class NegativeGraphLoader(GraphLoader):
         return super().collate_batch(full)
 
 
-def sampling_iterator(dataset, negatives=False, **kwargs):
-    if negatives:
-        return NegativeGraphLoader(dataset, **kwargs)
-    return GraphLoader(dataset, **kwargs)
-
-
 def load_cora(path="data/cora"):
     path = pathlib.Path(path)
 
