@@ -48,7 +48,7 @@ class UnsupervisedGraphNet(GraphNet):
 
 def build_model(max_epochs=2, logdir=".tmp/", train_split=None):
     model = UnsupervisedGraphNet(
-        GraphSAGEClassifier,
+        GraphSAGE,
         module__input_dim=1433,
         criterion=TripletLoss,
         batch_size=512,
