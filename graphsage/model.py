@@ -74,6 +74,7 @@ def build_supervised_model(max_epochs=2, logdir=".tmp/", train_split=None):
     model = UnsupervisedGraphNet(
         GraphSAGE,
         module__input_dim=1433,
+        module_n_classes=100,
         criterion=torch.nn.CrossEntropyLoss,
         batch_size=256,
         max_epochs=max_epochs,
