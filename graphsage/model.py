@@ -5,7 +5,7 @@ from skorch.dataset import get_len
 from skorch.dataset import unpack_data
 from skorch.dataset import uses_placeholder_y
 
-from graphsage.layers import GraphSAGE, GraphSAGEClassifier
+from graphsage.layers import GraphSAGE
 from graphsage.dataset import NegativeGraphLoader, GraphLoader
 from graphsage.losses import TripletLoss
 
