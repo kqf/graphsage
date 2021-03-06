@@ -26,13 +26,12 @@ class IndexMapper(dict):
             return
         self[x] = len(self)
 
+    def map(self, seq):
+        return np.array(list(map(self.get, seq)))
+
 
 def choice(seq, size):
     return np.random.choice(size, min(len(seq), size)).tolist()
-
-
-def amap(seq, mapping):
-    return np.array(list(map(mapping.get, seq)))
 
 
 def to_batch(features, all_nodes, layers):
@@ -106,13 +105,13 @@ class GraphLoader(torch.utils.data.DataLoader):
         # New datastructure to local mapping
         local_layers = []
         for nodes, edges in layers:
-            lnodes = amap(nodes, node2index)
+            lnodes = node2index.map(nodes)
             edges["source"] = edges["source"].map(node2index)
             edges["target"] = edges["target"].map(node2index)
             local_layers.append([lnodes, edges])
 
         all_nodes = np.array(list(node2index.keys()))
-        return all_nodes, amap(batch, node2index), local_layers
+        return all_nodes, node2index.map(batch), local_layers
 
 
 class NegativeGraphLoader(GraphLoader):
