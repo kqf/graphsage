@@ -29,7 +29,6 @@ class CooRecommender:
 
         # take into account only unobserved
         scores[occ > 0] = 0
-        print(scores)
 
         preds = (-scores).argpartition(self.k, -1)[..., :self.k]
         return np.take(self._itos, preds)
