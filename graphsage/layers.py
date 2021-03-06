@@ -7,7 +7,6 @@ class SAGEConv(torch.nn.Module):
     def __init__(
         self,
         input_dim=100,
-        hidden_dims=100,
         output_dim=100,
         dropout=0.5,
     ):
@@ -38,7 +37,7 @@ class GraphSAGE(torch.nn.Module):
     def __init__(
         self,
         input_dim=100,
-        hidden_dims=[100],
+        hidden_dims=[100, 100],
         output_dim=100,
         dropout=0.5,
     ):

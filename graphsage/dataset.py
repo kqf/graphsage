@@ -20,6 +20,13 @@ class GraphDataset(torch.utils.data.Dataset):
         return self.features.shape[0]
 
 
+class IndexMapper(dict):
+    def append(self, x):
+        if x in self:
+            return
+        self[x] = len(self)
+
+
 def choice(seq, size):
     return np.random.choice(size, min(len(seq), size)).tolist()
 
@@ -61,7 +68,7 @@ def sample_nodes(nodes, edge_list):
 
 
 class GraphLoader(torch.utils.data.DataLoader):
-    def __init__(self, dataset, sizes=[10], **kwargs):
+    def __init__(self, dataset, sizes=[10, 10], **kwargs):
         super().__init__(dataset, collate_fn=self.collate_fn, **kwargs)
         self.sizes = sizes
 
@@ -88,13 +95,13 @@ class GraphLoader(torch.utils.data.DataLoader):
 
     def to_local(self, batch, layers):
         # Calculate unique indices
-        uniq = set()
-        uniq.update(batch.reshape(-1))
-        for _, edges in layers:
-            uniq.update(edges.values.reshape(-1))
+        node2index = IndexMapper()
+        for idx in batch.reshape(-1):
+            node2index.append(idx)
 
-        # The local mapping
-        node2index = {v: i for i, v in enumerate(uniq)}
+        for nodes, _ in layers:
+            for node in nodes:
+                node2index.append(node)
 
         # New datastructure to local mapping
         local_layers = []
@@ -104,7 +111,8 @@ class GraphLoader(torch.utils.data.DataLoader):
             edges["target"] = edges["target"].map(node2index)
             local_layers.append([lnodes, edges])
 
-        return np.unique(list(uniq)), amap(batch, node2index), local_layers
+        all_nodes = np.array(list(node2index.keys()))
+        return all_nodes, amap(batch, node2index), local_layers
 
 
 class NegativeGraphLoader(GraphLoader):
