@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 from functools import partial
+from collections import defaultdict
 
 
 class GraphDataset(torch.utils.data.Dataset):
@@ -20,7 +21,7 @@ class GraphDataset(torch.utils.data.Dataset):
         return self.features.shape[0]
 
 
-class IndexMapper(dict):
+class IndexMapper(defaultdict):
     def append(self, x):
         if x in self:
             return
