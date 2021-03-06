@@ -1,6 +1,6 @@
-torch
+torch==1.7.1
+torch-scatter==2.0.5
 torchtext
-torch-scatter
 scikit-learn
 skorch
 numpy
