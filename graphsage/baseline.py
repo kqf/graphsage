@@ -1,10 +1,11 @@
 import numpy as np
+import pandas as pd
 
 from sklearn.feature_extraction.text import CountVectorizer
 
 
 class CooRecommender:
-    def __init__(self, k=5):
+    def __init__(self, k=3):
         self.k = k
         self._vec = CountVectorizer(lowercase=False, tokenizer=lambda x: x)
 
@@ -28,11 +29,27 @@ class CooRecommender:
 
         # take into account only unobserved
         scores[occ > 0] = 0
+        print(scores)
 
         preds = (-scores).argpartition(self.k, -1)[..., :self.k]
         return np.take(self._itos, preds)
 
 
-# Make sure our API is consistent with other modules
-def build_model(k=5):
+def build_model(k=3):
     return CooRecommender(k=k)
+
+
+def main():
+    df = pd.DataFrame({
+        "batch_in": [[1, 2], [2, 3], [3, 4]]
+    })
+    print(df.head())
+    model = build_model()
+    model.fit(df["batch_in"])
+
+    print(df["batch_in"].str[:1])
+    print(model.predict(df["batch_in"].str[:1]))
+
+
+if __name__ == '__main__':
+    main()
