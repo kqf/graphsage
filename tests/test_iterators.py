@@ -41,15 +41,22 @@ def batch_layers():
     ]
     layers.append(
         (
-            np.array([1, 2, 3, 4, 5]),
+            np.array([1, 2, 3, 4, 5, 6]),
             pd.DataFrame({
                 "source": [2, 3, 4, 5],
                 "target": [3, 4, 5, 6],
             })
         )
     )
-    return anchors, layers
+    return anchors, layers[::-1]
 
 
 def test_local_mapping(batch_layers):
     batch, layers = batch_layers
+    all_nodes, lbatch, llayers = GraphLoader.to_local(batch, layers)
+
+    # Global mapping
+    np.testing.assert_equal(all_nodes, np.array([1, 2, 3, 4, 5, 6]))
+
+    # The local mapping
+    np.testing.assert_equal(lbatch, np.array([0, 1, 2, 3]))
