@@ -68,7 +68,7 @@ def sample_nodes(nodes, edge_list):
 
 
 class GraphLoader(torch.utils.data.DataLoader):
-    def __init__(self, dataset, sizes=[10, 10], **kwargs):
+    def __init__(self, dataset, sizes=[10], **kwargs):
         super().__init__(dataset, collate_fn=self.collate_fn, **kwargs)
         self.sizes = sizes
 
