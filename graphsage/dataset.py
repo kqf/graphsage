@@ -93,7 +93,8 @@ class GraphLoader(torch.utils.data.DataLoader):
         x = self.dataset.features.iloc[all_nodes].values
         return to_batch(x, batch, layers)
 
-    def to_local(self, batch, layers):
+    @staticmethod
+    def to_local(batch, layers):
         # Calculate unique indices
         node2index = IndexMapper()
         for idx in batch.reshape(-1):
